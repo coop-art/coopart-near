@@ -1,0 +1,2 @@
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/Users/lol/apps/fun/coopart-near/contract/target/wasm32-unknown-unknown/debug/build/typenum-11aa8bef3f3b3f6f/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/Users/lol/apps/fun/coopart-near/contract/target/wasm32-unknown-unknown/debug/build/typenum-11aa8bef3f3b3f6f/out/op.rs
