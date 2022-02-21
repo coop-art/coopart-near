@@ -1,0 +1,12 @@
+/Users/lol/apps/fun/coopart-near/contract/target/release/deps/proc_macro2-c341752c6738ad94.rmeta: /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/lib.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/marker.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/parse.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/detection.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/fallback.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/wrapper.rs
+
+/Users/lol/apps/fun/coopart-near/contract/target/release/deps/libproc_macro2-c341752c6738ad94.rlib: /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/lib.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/marker.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/parse.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/detection.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/fallback.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/wrapper.rs
+
+/Users/lol/apps/fun/coopart-near/contract/target/release/deps/proc_macro2-c341752c6738ad94.d: /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/lib.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/marker.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/parse.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/detection.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/fallback.rs /Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/wrapper.rs
+
+/Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/lib.rs:
+/Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/marker.rs:
+/Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/parse.rs:
+/Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/detection.rs:
+/Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/fallback.rs:
+/Users/lol/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/wrapper.rs:
