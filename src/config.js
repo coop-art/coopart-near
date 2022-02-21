@@ -1,4 +1,4 @@
-const CONTRACT_NAME = process.env.CONTRACT_NAME ||'coopart-near'
+const CONTRACT_NAME = process.env.CONTRACT_NAME ||'coopart-near.coopart.testnet'
 
 function getConfig(env) {
   switch (env) {
