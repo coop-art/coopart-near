@@ -1,16 +1,23 @@
+import dayjs from "dayjs";
+import { create } from "ipfs-http-client";
 import React from "react";
 
 import getConfig from "./config";
+import { EditCanvas } from "./EditCanvas";
 import { login, logout } from "./utils";
 
 import "./global.css";
 import "regenerator-runtime/runtime";
 
 const { networkId } = getConfig(process.env.NODE_ENV || "development");
+const client = create({ url: "https://ipfs.infura.io:5001/api/v0" });
 
 export default function App() {
   // use React Hooks to store greeting in component state
   const [greeting, set_greeting] = React.useState();
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [isMinting, setIsMinting] = React.useState(false);
+  const [newTile, setNewTile] = React.useState();
 
   // when the user has not yet interacted with the form, disable the button
   const [buttonDisabled, setButtonDisabled] = React.useState(true);
@@ -38,6 +45,49 @@ export default function App() {
     // This works because signing into NEAR Wallet reloads the page
     []
   );
+
+  async function handleUpload(file) {
+    const tileId = Math.floor(Math.random() * 1000000); //TODO: Implement better tileId
+    const deadline = dayjs().add(7, "days").format();
+
+    try {
+      setIsUploading(true);
+
+      // Upload to IPFS
+      const uploadedImage = await client.add(file);
+
+      // Get image size
+      var reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = function (e) {
+        var image = new Image();
+        //@ts-ignore
+        image.src = e.target.result;
+        image.onload = function () {
+          //@ts-ignore
+          console.log("onload", this.width, this.height);
+          setNewTile({
+            tileId,
+            canvasId: 1,
+            x: 0,
+            y: 0,
+            r: 0,
+            image: `ipfs://${uploadedImage.path}`,
+            deadline,
+            //@ts-ignore
+            width: this.width,
+            //@ts-ignore
+            height: this.height,
+          });
+
+          setIsUploading(false);
+        };
+      };
+    } catch (error) {
+      console.error(error);
+      setIsUploading(false);
+    }
+  }
 
   // if not signed in, return early with sign-in prompt
   if (!window.walletConnection.isSignedIn()) {
@@ -76,6 +126,37 @@ export default function App() {
         Sign out
       </button>
       <main>
+        {isUploading ? (
+          <div>Uploading...</div>
+        ) : (
+          <div>
+            <label htmlFor="uploader">
+              <div
+                style={{
+                  backgroundColor: "#0072ce",
+                  borderRadius: "5px",
+                  color: "#efefef",
+                  cursor: "pointer",
+                }}
+              >
+                Upload Image
+              </div>
+            </label>
+            <input
+              hidden
+              id="uploader"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                e.target &&
+                  e.target.files &&
+                  e.target.files[0] &&
+                  handleUpload(e.target.files[0]);
+              }}
+            />
+          </div>
+        )}
+
         <h1>
           <label
             htmlFor="greeting"
@@ -164,47 +245,10 @@ export default function App() {
           </fieldset>
         </form>
         <p>
-          Look at that! A Hello World app! This greeting is stored on the NEAR
-          blockchain. Check it out:
+          Participate in the current cooperative canvas and earn a share of its
+          selling price.
         </p>
-        <ol>
-          <li>
-            Look in <code>src/App.js</code> and <code>src/utils.js</code> –
-            you'll see <code>get_greeting</code> and <code>set_greeting</code>{" "}
-            being called on <code>contract</code>. What's this?
-          </li>
-          <li>
-            Ultimately, this <code>contract</code> code is defined in{" "}
-            <code>assembly/main.ts</code> – this is the source code for your{" "}
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href="https://docs.near.org/docs/develop/contracts/overview"
-            >
-              smart contract
-            </a>
-            .
-          </li>
-          <li>
-            When you run <code>yarn dev</code>, the code in{" "}
-            <code>assembly/main.ts</code> gets deployed to the NEAR testnet. You
-            can see how this happens by looking in <code>package.json</code> at
-            the <code>scripts</code> section to find the <code>dev</code>{" "}
-            command.
-          </li>
-        </ol>
-        <hr />
-        <p>
-          To keep learning, check out{" "}
-          <a target="_blank" rel="noreferrer" href="https://docs.near.org">
-            the NEAR docs
-          </a>{" "}
-          or look through some{" "}
-          <a target="_blank" rel="noreferrer" href="https://examples.near.org">
-            example apps
-          </a>
-          .
-        </p>
+        <EditCanvas existingTiles={[]} newTile={newTile} updateTileCallback={(tile) => setNewTile(tile)} />
       </main>
       {showNotification && <Notification />}
     </>
