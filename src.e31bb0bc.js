@@ -29567,7 +29567,7 @@ if ("development" === 'production') {
   module.exports = require('./cjs/react-dom.development.js');
 }
 },{"./cjs/react-dom.development.js":"../node_modules/react-dom/cjs/react-dom.development.js"}],"config.js":[function(require,module,exports) {
-const CONTRACT_NAME = "dev-1645445779589-38746861904252" || 'coopart-near';
+const CONTRACT_NAME = "dev-1645445779589-38746861904252" || 'coopart-near.coopart.testnet';
 
 function getConfig(env) {
   switch (env) {
@@ -47185,7 +47185,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64805" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61237" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
