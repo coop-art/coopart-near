@@ -24,12 +24,14 @@ setup_alloc!();
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Welcome {
     records: LookupMap<String, String>,
+    downvotes: i8,
 }
 
 impl Default for Welcome {
   fn default() -> Self {
     Self {
       records: LookupMap::new(b"a".to_vec()),
+      downvotes: 0
     }
   }
 }
@@ -54,6 +56,18 @@ impl Welcome {
             None => "Hello".to_string(),
         }
     }
+
+    pub fn get_downvotes(&self) -> i8 {
+        return self.downvotes;
+    }
+
+    pub fn increment_downvotes(&mut self) {
+        self.downvotes += 1;
+        let log_message = format!("Downvoted to {}", self.downvotes);
+        env::log(log_message.as_bytes());
+    }
+
+
 }
 
 /*
@@ -112,10 +126,19 @@ mod tests {
         let context = get_context(vec![], true);
         testing_env!(context);
         let contract = Welcome::default();
-        // this test did not call set_greeting so should return the default "Hello" greeting
         assert_eq!(
             "Hello".to_string(),
             contract.get_greeting("francis.near".to_string())
         );
+    }
+
+    #[test]
+    fn increment_downvotes() {
+        let context = get_context(vec![], true);
+        testing_env!(context);
+        let mut contract = Welcome::default();
+        contract.increment_downvotes();
+        println!("Value after downvote: {}", contract.get_downvotes());
+        assert_eq!(1, contract.get_downvotes());
     }
 }
