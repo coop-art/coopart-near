@@ -2,6 +2,12 @@ module.exports = {
   presets: [
     "@babel/preset-env",
     "@babel/preset-react",
-    "@babel/plugin-transform-runtime",
+  ],
+  plugins: [
+    ["@babel/plugin-transform-runtime",
+      {
+        "regenerator": true
+      }
+    ]
   ],
 };
