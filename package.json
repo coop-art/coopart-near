@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.17.2",
+    "core-js": "^3.21.1",
     "dayjs": "^1.10.7",
     "ipfs-http-client": "^56.0.1",
     "konva": "^8.0.1 || ^7.2.5",
@@ -62,9 +63,7 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+      "last 1 chrome version"
     ],
     "development": [
       "last 1 chrome version",
