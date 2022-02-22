@@ -18,6 +18,7 @@ export default function App() {
   const [isUploading, setIsUploading] = React.useState(false);
   const [isMinting, setIsMinting] = React.useState(false);
   const [newTile, setNewTile] = React.useState();
+  const [downvotes, setDownvotes] = React.useState();
 
   // when the user has not yet interacted with the form, disable the button
   const [buttonDisabled, setButtonDisabled] = React.useState(true);
@@ -37,6 +38,9 @@ export default function App() {
           .then((greetingFromContract) => {
             set_greeting(greetingFromContract);
           });
+        window.contract.get_downvotes().then((downvotesFromContract) => {
+          setDownvotes(downvotesFromContract);
+        });
       }
     },
 
@@ -45,6 +49,33 @@ export default function App() {
     // This works because signing into NEAR Wallet reloads the page
     []
   );
+
+  async function handleDownvote() {
+    try {
+      // make an update call to the smart contract
+      await window.contract.increment_downvotes();
+    } catch (e) {
+      alert(
+        "Something went wrong! " +
+          "Maybe you need to sign out and back in? " +
+          "Check your browser console for more info."
+      );
+      throw e;
+    } finally {
+      window.contract.get_downvotes().then((downvotesFromContract) => {
+        setDownvotes(downvotesFromContract);
+      });
+    }
+
+    // show Notification
+    setShowNotification(true);
+
+    // remove Notification again after css animation completes
+    // this allows it to be shown again next time the form is submitted
+    setTimeout(() => {
+      setShowNotification(false);
+    }, 11000);
+  }
 
   async function handleUpload(file) {
     const tileId = Math.floor(Math.random() * 1000000); //TODO: Implement better tileId
@@ -248,7 +279,13 @@ export default function App() {
           Participate in the current cooperative canvas and earn a share of its
           selling price.
         </p>
-        <EditCanvas existingTiles={[]} newTile={newTile} updateTileCallback={(tile) => setNewTile(tile)} />
+        <button onClick={() => handleDownvote()}>Downvote</button>
+        <div>Downvotes: {downvotes}</div>
+        <EditCanvas
+          existingTiles={[]}
+          newTile={newTile}
+          updateTileCallback={(tile) => setNewTile(tile)}
+        />
       </main>
       {showNotification && <Notification />}
     </>
