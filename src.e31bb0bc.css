@@ -12,7 +12,7 @@ html {
   --primary: #FF585D;
   --secondary: #0072CE;
 
-  background-color: var(--bg);
+  background-color: #000;
   color: var(--fg);
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
   font-size: calc(0.9em + 0.5vw);
@@ -26,7 +26,11 @@ body {
 
 main {
   margin: 0 auto;
-  max-width: 25em;
+}
+
+main > p {
+  margin: auto;
+  max-width: 800px;
 }
 
 h1 {
@@ -187,5 +191,16 @@ aside footer *:last-child {
   }
 }
 
+.canvas {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+  background: linear-gradient(115deg, transparent 75%, rgba(30, 30, 30, 0.8) 75%) 0 0,
+    linear-gradient(245deg, transparent 75%, rgba(30, 30, 30, 0.8) 75%) 0 0,
+    linear-gradient(115deg, transparent 75%, rgba(30, 30, 30, 0.8) 75%) 7px -15px,
+    linear-gradient(245deg, transparent 75%, rgba(30, 30, 30, 0.8) 75%) 7px -15px, #000;
+  background-size: 15px 30px;
+}
 
 /*# sourceMappingURL=/src.e31bb0bc.css.map */
