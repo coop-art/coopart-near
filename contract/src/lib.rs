@@ -1,85 +1,85 @@
-/*
- * This is an example of a Rust smart contract with two simple, symmetric functions:
- *
- * 1. set_greeting: accepts a greeting, such as "howdy", and records it for the user (account_id)
- *    who sent the request
- * 2. get_greeting: accepts an account_id and returns the greeting saved for it, defaulting to
- *    "Hello"
- *
- * Learn more about writing NEAR smart contracts with Rust:
- * https://github.com/near/near-sdk-rs
- *
- */
-
-// To conserve gas, efficient serialization is achieved through Borsh (http://borsh.io/)
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen, setup_alloc};
-use near_sdk::collections::LookupMap;
+use near_sdk::serde::{Serialize, Deserialize};
+use near_sdk::AccountId;
 
 setup_alloc!();
 
-// Structs in Rust are similar to other languages, and may include impl keyword as shown below
-// Note: the names of the structs are not important when calling the smart contract, but the function names are
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Welcome {
-    records: LookupMap<String, String>,
-    downvotes: i8,
+    pub layers: Vec<Layer>,
+}
+
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Layer {
+    pub owner_id: AccountId,
+    pub token_uri: String,
+    pub downvotes: i8,
+    pub upvotes: i8,
 }
 
 impl Default for Welcome {
   fn default() -> Self {
     Self {
-      records: LookupMap::new(b"a".to_vec()),
-      downvotes: 0
+      layers: Vec::new(),
     }
   }
 }
 
 #[near_bindgen]
 impl Welcome {
-    pub fn set_greeting(&mut self, message: String) {
-        let account_id = env::signer_account_id();
-
-        // Use env::log to record logs permanently to the blockchain!
-        env::log(format!("Saving greeting '{}' for account '{}'", message, account_id,).as_bytes());
-
-        self.records.insert(&account_id, &message);
+    pub fn mint_layer(&mut self, token_uri: String) {
+        let owner_id = env::signer_account_id();
+        
+        let layer = Layer {
+            owner_id,
+            token_uri,
+            downvotes: 0,
+            upvotes: 0,
+        };
+        env::log(format!("Layers increased to '{}'", self.layers.len(),).as_bytes());
+        self.layers.push(layer);
     }
 
-    // `match` is similar to `switch` in other languages; here we use it to default to "Hello" if
-    // self.records.get(&account_id) is not yet defined.
-    // Learn more: https://doc.rust-lang.org/book/ch06-02-match.html#matching-with-optiont
-    pub fn get_greeting(&self, account_id: String) -> String {
-        match self.records.get(&account_id) {
-            Some(greeting) => greeting,
-            None => "Hello".to_string(),
-        }
+    pub fn get_layers(&self) -> Vec<Layer> {
+        let newvec = self.layers.to_vec();
+        newvec
     }
 
-    pub fn get_downvotes(&self) -> i8 {
-        return self.downvotes;
+    // pub fn get_layer(&self, index: usize)  -> Layer {
+    //     let newvec = self.layers.to_vec();
+    //     let selected = newvec.get(index);
+
+    //     match selected {
+    //         Some(x) => *x,
+    //         None => Layer {
+    //             owner_id: null,
+    //             token_uri: "",
+    //             downvotes: 0,
+    //             upvotes: 0,
+    //         };,
+    //     }
+    // }
+
+    pub fn get_layers_length(&self) -> usize {
+        return self.layers.len()
     }
 
-    pub fn increment_downvotes(&mut self) {
-        self.downvotes += 1;
-        let log_message = format!("Downvoted to {}", self.downvotes);
-        env::log(log_message.as_bytes());
+    pub fn increment_downvotes(&mut self, index: usize) {
+        self.layers[index].downvotes += 1;
     }
 
+    pub fn increment_upvotes(&mut self, index: usize) {
+        self.layers[index].upvotes += 1;
+    }
 
 }
 
 /*
- * The rest of this file holds the inline tests for the code above
- * Learn more about Rust tests: https://doc.rust-lang.org/book/ch11-01-writing-tests.html
- *
- * To run from contract directory:
+ * TESTS
  * cargo test -- --nocapture
- *
- * From project root, to run in combination with frontend tests:
- * yarn test
- *
  */
 #[cfg(test)]
 mod tests {
@@ -110,35 +110,46 @@ mod tests {
     }
 
     #[test]
-    fn set_then_get_greeting() {
+    fn mint_layer() {
         let context = get_context(vec![], false);
         testing_env!(context);
         let mut contract = Welcome::default();
-        contract.set_greeting("howdy".to_string());
-        assert_eq!(
-            "howdy".to_string(),
-            contract.get_greeting("bob_near".to_string())
-        );
+        assert_eq!(0,contract.get_layers_length());
+        contract.mint_layer("test".to_string());
+        assert_eq!(1,contract.get_layers_length());
     }
 
-    #[test]
-    fn get_default_greeting() {
-        let context = get_context(vec![], true);
-        testing_env!(context);
-        let contract = Welcome::default();
-        assert_eq!(
-            "Hello".to_string(),
-            contract.get_greeting("francis.near".to_string())
-        );
-    }
+    // #[test]
+    // fn set_then_get_greeting() {
+    //     let context = get_context(vec![], false);
+    //     testing_env!(context);
+    //     let mut contract = Welcome::default();
+    //     contract.set_greeting("howdy".to_string());
+    //     assert_eq!(
+    //         "howdy".to_string(),
+    //         contract.get_greeting("bob_near".to_string())
+    //     );
+    // }
 
-    #[test]
-    fn increment_downvotes() {
-        let context = get_context(vec![], true);
-        testing_env!(context);
-        let mut contract = Welcome::default();
-        contract.increment_downvotes();
-        println!("Value after downvote: {}", contract.get_downvotes());
-        assert_eq!(1, contract.get_downvotes());
-    }
+    // #[test]
+    // fn get_default_greeting() {
+    //     let context = get_context(vec![], true);
+    //     testing_env!(context);
+    //     let contract = Welcome::default();
+    //     assert_eq!(
+    //         "Hello".to_string(),
+    //         contract.get_greeting("francis.near".to_string())
+    //     );
+    // }
+
+    // #[test]
+    // fn increment_downvotes() {
+    //     let context = get_context(vec![], true);
+    //     testing_env!(context);
+    //     let mut contract = Welcome::default();
+    //     contract.mint_layer("test".to_string());
+    //     assert_eq!(0,contract.layers[0].downvotes);
+    //     contract.increment_downvotes(0);
+    //     // assert_eq!(1,contract.get_layers()[0].downvotes);
+    // }
 }
