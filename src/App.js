@@ -13,12 +13,10 @@ const { networkId } = getConfig(process.env.NODE_ENV || "development");
 const client = create({ url: "https://ipfs.infura.io:5001/api/v0" });
 
 export default function App() {
-  // use React Hooks to store greeting in component state
-  const [greeting, set_greeting] = React.useState();
   const [isUploading, setIsUploading] = React.useState(false);
   const [isMinting, setIsMinting] = React.useState(false);
   const [newTile, setNewTile] = React.useState();
-  const [downvotes, setDownvotes] = React.useState();
+  const [layers, setLayers] = React.useState();
 
   // when the user has not yet interacted with the form, disable the button
   const [buttonDisabled, setButtonDisabled] = React.useState(true);
@@ -33,13 +31,14 @@ export default function App() {
       // in this case, we only care to query the contract when signed in
       if (window.walletConnection.isSignedIn()) {
         // window.contract is set by initContract in index.js
-        window.contract
-          .get_greeting({ account_id: window.accountId })
-          .then((greetingFromContract) => {
-            set_greeting(greetingFromContract);
-          });
-        window.contract.get_downvotes().then((downvotesFromContract) => {
-          setDownvotes(downvotesFromContract);
+        // window.contract
+        //   .get_greeting({ account_id: window.accountId })
+        //   .then((greetingFromContract) => {
+        //     set_greeting(greetingFromContract);
+        //   });
+        window.contract.get_layers().then((layersFromContract) => {
+          console.log(layersFromContract);
+          setLayers(layersFromContract);
         });
       }
     },
@@ -50,10 +49,34 @@ export default function App() {
     []
   );
 
-  async function handleDownvote() {
+  async function handleMint(tile) {
     try {
-      // make an update call to the smart contract
-      await window.contract.increment_downvotes();
+      setIsMinting(true);
+
+      // Upload to IPFS
+
+      const json = {
+        name: "Coopart Tile",
+        description: "Coopart Tile",
+        image: tile.image,
+        tileId: tile.tileId,
+        x: tile.x, // TODO: Store doubles
+        y: tile.y,
+        r: tile.r,
+        width: tile.width,
+        height: tile.height,
+        deadline: tile.deadline,
+      };
+
+      console.log("tile", tile);
+
+      const uploadedJson = await client.add(Buffer.from(JSON.stringify(json)));
+
+      const tokenUri = `ipfs://${uploadedJson.path}`;
+
+      console.log("tokenUri", tokenUri);
+
+      await window.contract.mint_layer(tokenUri);
     } catch (e) {
       alert(
         "Something went wrong! " +
@@ -61,21 +84,49 @@ export default function App() {
           "Check your browser console for more info."
       );
       throw e;
-    } finally {
-      window.contract.get_downvotes().then((downvotesFromContract) => {
-        setDownvotes(downvotesFromContract);
-      });
     }
+    // finally {
+    //   window.contract.get_downvotes().then((downvotesFromContract) => {
+    //     setDownvotes(downvotesFromContract);
+    //   });
+    // }
 
-    // show Notification
-    setShowNotification(true);
+    // // show Notification
+    // setShowNotification(true);
 
-    // remove Notification again after css animation completes
-    // this allows it to be shown again next time the form is submitted
-    setTimeout(() => {
-      setShowNotification(false);
-    }, 11000);
+    // // remove Notification again after css animation completes
+    // // this allows it to be shown again next time the form is submitted
+    // setTimeout(() => {
+    //   setShowNotification(false);
+    // }, 11000);
   }
+
+  // async function handleDownvote() {
+  //   try {
+  //     // make an update call to the smart contract
+  //     await window.contract.increment_downvotes();
+  //   } catch (e) {
+  //     alert(
+  //       "Something went wrong! " +
+  //         "Maybe you need to sign out and back in? " +
+  //         "Check your browser console for more info."
+  //     );
+  //     throw e;
+  //   } finally {
+  //     window.contract.get_downvotes().then((downvotesFromContract) => {
+  //       setDownvotes(downvotesFromContract);
+  //     });
+  //   }
+
+  //   // show Notification
+  //   setShowNotification(true);
+
+  //   // remove Notification again after css animation completes
+  //   // this allows it to be shown again next time the form is submitted
+  //   setTimeout(() => {
+  //     setShowNotification(false);
+  //   }, 11000);
+  // }
 
   async function handleUpload(file) {
     const tileId = Math.floor(Math.random() * 1000000); //TODO: Implement better tileId
@@ -153,134 +204,43 @@ export default function App() {
   return (
     // use React Fragment, <>, to avoid wrapping elements in unnecessary divs
     <>
-      <button className="link" style={{ float: "right" }} onClick={logout}>
-        Sign out
-      </button>
       <main>
-        {isUploading ? (
-          <div>Uploading...</div>
-        ) : (
-          <div>
-            <label htmlFor="uploader">
-              <div
-                style={{
-                  backgroundColor: "#0072ce",
-                  borderRadius: "5px",
-                  color: "#efefef",
-                  cursor: "pointer",
-                }}
-              >
-                Upload Image
-              </div>
-            </label>
-            <input
-              hidden
-              id="uploader"
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                e.target &&
-                  e.target.files &&
-                  e.target.files[0] &&
-                  handleUpload(e.target.files[0]);
-              }}
-            />
-          </div>
-        )}
-
-        <h1>
-          <label
-            htmlFor="greeting"
-            style={{
-              color: "var(--secondary)",
-              borderBottom: "2px solid var(--secondary)",
-            }}
-          >
-            {greeting}
-          </label>
-          {
-            " " /* React trims whitespace around tags; insert literal space character when needed */
-          }
-          {window.accountId}!
-        </h1>
-        <form
-          onSubmit={async (event) => {
-            event.preventDefault();
-
-            // get elements from the form using their id attribute
-            const { fieldset, greeting } = event.target.elements;
-
-            // hold onto new user-entered value from React's SynthenticEvent for use after `await` call
-            const newGreeting = greeting.value;
-
-            // disable the form while the value gets updated on-chain
-            fieldset.disabled = true;
-
-            try {
-              // make an update call to the smart contract
-              await window.contract.set_greeting({
-                // pass the value that the user entered in the greeting field
-                message: newGreeting,
-              });
-            } catch (e) {
-              alert(
-                "Something went wrong! " +
-                  "Maybe you need to sign out and back in? " +
-                  "Check your browser console for more info."
-              );
-              throw e;
-            } finally {
-              // re-enable the form, whether the call succeeded or failed
-              fieldset.disabled = false;
-            }
-
-            // update local `greeting` variable to match persisted value
-            set_greeting(newGreeting);
-
-            // show Notification
-            setShowNotification(true);
-
-            // remove Notification again after css animation completes
-            // this allows it to be shown again next time the form is submitted
-            setTimeout(() => {
-              setShowNotification(false);
-            }, 11000);
-          }}
-        >
-          <fieldset id="fieldset">
-            <label
-              htmlFor="greeting"
-              style={{
-                display: "block",
-                color: "var(--gray)",
-                marginBottom: "0.5em",
-              }}
-            >
-              Change greeting
-            </label>
-            <div style={{ display: "flex" }}>
+        <div className="action-grid">
+          {isUploading ? (
+            <div>Uploading...</div>
+          ) : (
+            <div>
+              <label htmlFor="uploader">
+                <div className="button">1- Upload Image</div>
+              </label>
               <input
-                autoComplete="off"
-                defaultValue={greeting}
-                id="greeting"
-                onChange={(e) => setButtonDisabled(e.target.value === greeting)}
-                style={{ flex: 1 }}
+                hidden
+                id="uploader"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  e.target &&
+                    e.target.files &&
+                    e.target.files[0] &&
+                    handleUpload(e.target.files[0]);
+                }}
               />
-              <button
-                disabled={buttonDisabled}
-                style={{ borderRadius: "0 5px 5px 0" }}
-              >
-                Save
-              </button>
             </div>
-          </fieldset>
-        </form>
-        <p>
-          Participate in the current cooperative canvas and earn a share of its
-          selling price.
-        </p>
-        <button onClick={() => handleDownvote()}>Downvote</button>
-        <div>Downvotes: {downvotes}</div>
+          )}
+          {isMinting ? (
+            <div>Minting...</div>
+          ) : (
+            <button onClick={() => handleMint(newTile)}>2- Mint layer</button>
+          )}
+          <p>
+            Participate in the current cooperative canvas and earn a share of
+            its selling price.
+          </p>
+          <button className="link" style={{ float: "right" }} onClick={logout}>
+            Sign out
+          </button>
+        </div>
+        {/* <div>Downvotes: {downvotes}</div> */}
         <EditCanvas
           existingTiles={[]}
           newTile={newTile}
@@ -307,7 +267,7 @@ function Notification() {
       {
         " " /* React trims whitespace around tags; insert literal space character when needed */
       }
-      called method: 'set_greeting' in contract:{" "}
+      Method called in contract:{" "}
       <a
         target="_blank"
         rel="noreferrer"

@@ -64,7 +64,7 @@ button, input {
   outline: none;
 }
 
-button {
+button, .button {
   background-color: var(--secondary);
   border-radius: 5px;
   border: none;
@@ -72,6 +72,11 @@ button {
   cursor: pointer;
   padding: 0.3em 0.75em;
   transition: transform 30ms;
+
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
 }
 button:hover, button:focus {
   box-shadow: 0 0 10em rgba(255, 255, 255, 0.2) inset;
@@ -201,4 +206,10 @@ aside footer *:last-child {
     linear-gradient(115deg, transparent 75%, rgba(30, 30, 30, 0.8) 75%) 7px -15px,
     linear-gradient(245deg, transparent 75%, rgba(30, 30, 30, 0.8) 75%) 7px -15px, #000;
   background-size: 15px 30px;
+}
+
+.action-grid {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: 200px 200px auto 200px;
 }
